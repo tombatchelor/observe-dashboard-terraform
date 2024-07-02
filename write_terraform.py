@@ -613,13 +613,15 @@ else:
 OUTPUTFILENAME = args.output_name if args.output_name else "output.tf"
 BEARERTOKEN = args.bearer_token if args.bearer_token else get_bearer_token()
 
-DASHBOARD_ID = args.dash_id
+dashIDs = args.dash_id
+if "," in args.dash_id:
+    dashIDs = args.dash_id.split(",")
 
 # customer_id = getObserveConfig("customer_id", ENVIRONMENT)
 # domain = getObserveConfig("domain", ENVIRONMENT)
 META_URL = f"https://{customer_id}.{domain}/v1/meta"
 
-print("dashboard id:", DASHBOARD_ID)
+print("dashboard id:", dashIDs)
 print("file name:", OUTPUTFILENAME)
 
 OUTPUT_EXISTS = os.path.exists(OUTPUTFILENAME)
@@ -637,9 +639,6 @@ TMP_FILE_NAME_FMT = "{ROOT_OUTPUT_DIR}/tmp/i_{DASHBOARD_ID}.tmp"
 pathlib.Path(f"""{ROOT_OUTPUT_DIR}/{JSON_DIR}""").mkdir(parents=True, exist_ok=True)
 pathlib.Path(f"""{ROOT_OUTPUT_DIR}/tmp""").mkdir(parents=True, exist_ok=True)
 
-#dashIDs = ["41015790","41011423","41002596","41002614","41002603","41013316","41013535","41013796","41013545","41014136","41014718","41013284","41014705","41014817","41015706","41015806","41013247","41013711","41013378","41015626","41013300","41013454","41013660","41013454","41012210","41013486","41014520","41014632","41015762","41013677","41013768","41014556","41013805","41013407","41013534","41011620","41012338","41003397","41014456","41016017","41016020","41016557","41016472","41016568","41016561","41016565","41016088","41016475","41016474","41016652","41017002","41016018","41014473","41016025"]
-#dashIDs = ["41016834","41016314"]
-
 # dict for stuff we are replacing
 stuff_to_replace_dict = {"datasets": []}
 
@@ -655,7 +654,7 @@ get_dashboards(args.workspace_id)
 with open(ALL_DASHBOARDS_JSON_FILE_PATH, "r", encoding="utf-8") as outfile:
     dashboards = json.load(outfile)
     for board in dashboards:
-        if board["dashboard"]["id"] == DASHBOARD_ID:
+        if board["dashboard"]["id"] in dashIDs:
             print(board["dashboard"]["id"])
             DASHBOARD_ID = board["dashboard"]["id"]
             OUTPUTFILENAME = OUTPUTFILENAME_FMT.format(
@@ -753,7 +752,7 @@ with open(ALL_DASHBOARDS_JSON_FILE_PATH, "r", encoding="utf-8") as outfile:
     locals_def.append("name_format = var.name_format")
 
     for board in dashboards:
-        if board["dashboard"]["id"] == DASHBOARD_ID:
+        if board["dashboard"]["id"] in dashIDs:
             print(board["dashboard"]["id"])
             DASHBOARD_ID = board["dashboard"]["id"]
             DASHBOARD_NAME = board["dashboard"]["name"]
@@ -804,39 +803,6 @@ with open(DATASET_FILE_PATH, "r", encoding="utf-8") as datasets_file:
             name, f"""format(var.name_format, {name})"""
         )
 
-    # if args.conditional_sections:
-    #     # get original dashboard terraform content
-    #     # this is not consistent with the way we handle replacing strings later on
-    #     # but the strings we want to replace here include newline chars
-    #     # and that wouldn't work with the line-iterative approach we take later.
-    #     with open(TMP_FILE_NAME, "r", encoding="utf-8") as fp:
-    #         dashboard_def_string = fp.read()
-
-    #     for hidden_param in get_hidden_params(DASHBOARD_ID):
-    #         locals_def.append(
-    #             f"""hidden_param_default_{hidden_param.get("id")} = "replace_me" """
-    #         )
-    #         for match in get_param_obj_strings(
-    #             dashboard_def_string, hidden_param.get("id")
-    #         ):
-    #             # find all the json objects that contain id = param_id
-    #             # and replace their {defaultValue = { string = "" }}
-    #             # with {defaultValue = { string = local.hidden_param_default_param_id }}
-    #             if "defaultValue " in match.group():
-    #                 dashboard_def_string = dashboard_def_string.replace(
-    #                     match.group(),
-    #                     match.group().replace(
-    #                         'string = ""',
-    #                         "string = local.hidden_param_default_{0}".format(
-    #                             hidden_param.get("id")
-    #                         ),
-    #                     ),
-    #                 )
-
-    #     # overwrite the temp file with hidden param default strings replaced with locals
-    #     with open(TMP_FILE_NAME, "w", encoding="utf-8") as fp:
-    #         fp.write(dashboard_def_string)
-
     locals_def.append("}")
 
     with open(LOCALS_FILE_PATH, "w", encoding="utf-8") as locals_file:
@@ -852,7 +818,7 @@ workspace_oid = None
 with open(ALL_DASHBOARDS_JSON_FILE_PATH, "r", encoding="utf-8") as outfile:
     dashboards = json.load(outfile)
     for board in dashboards:
-        if board["dashboard"]["id"] == DASHBOARD_ID:
+        if board["dashboard"]["id"] in dashIDs:
             print(board["dashboard"]["id"])
             DASHBOARD_ID = board["dashboard"]["id"]
             OUTPUTFILENAME = OUTPUTFILENAME_FMT.format(
@@ -919,7 +885,7 @@ with open(ALL_DASHBOARDS_JSON_FILE_PATH, "r", encoding="utf-8") as outfile:
     dashboards = json.load(outfile)
     print(stuff_to_replace_dict)
     for board in dashboards:
-        if board["dashboard"]["id"] == DASHBOARD_ID:
+        if board["dashboard"]["id"] in dashIDs:
             print(board["dashboard"]["id"])
             DASHBOARD_ID = board["dashboard"]["id"]
             DASHBOARD_NAME = board["dashboard"]["name"]

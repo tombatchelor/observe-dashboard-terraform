@@ -29,10 +29,10 @@ To perform en export, an example is the following
 `./write_terraform.py -c ./config.ini -e example -w 41006584 -d 41570960`
 
 Where:
-- '-c' is the path to `config.ini`
+- `-c` is the path to `config.ini`
 - `-e` is the environment block in the `config.ini` file 
 - `-w` is the workspace id, this appears in the dashboard URL right after `/workspace/`
-- `-d` is the dashboard id, this appears at the end of the dashboard URL
+- `-d` is the dashboard id, this appears at the end of the dashboard URL, note this may be a comma separated list of dashboard IDs, e.g. `-d 12345678,90123456,67890123`
 
 This is the dashboard URL for the above example `https://12345678910.observeinc.com/workspace/41006584/dashboard/System-Overview-41570960`
 
